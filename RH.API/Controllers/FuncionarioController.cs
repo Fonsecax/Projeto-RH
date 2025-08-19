@@ -73,6 +73,64 @@ namespace RH.API.Controllers
             return CreatedAtAction(nameof(GetFuncionario), new { id = funcionario.Id }, funcionario);
         }
 
+        [HttpPatch("/{funcionarioId}")]
+        public async Task<IActionResult> EditFuncionario(Guid funcionarioId, [FromBody] FuncionarioDTO funcionarioDTO)
+        {
+            if (funcionarioId == Guid.Empty)
+            {
+                return BadRequest("O funcionário não pode ser vazio.");
+            }
+            if (string.IsNullOrEmpty(funcionarioDTO.Nome) || string.IsNullOrEmpty(funcionarioDTO.Documento))
+            {
+                return BadRequest("Nome e Documento não podem ficar vazios.");
+            }
 
+            var funcionario = await _context.Funcionarios.FirstOrDefaultAsync(f => f.Id == funcionarioId && f.Ativo);
+            if (funcionario == null)
+            {
+                return BadRequest("Funcionário não encontrado.");
+            }
+
+            var area = await _context.Funcionarios.FirstOrDefaultAsync(a => a.Id == funcionarioDTO.Area && a.Ativo);
+            if (area == null)
+            {
+                return BadRequest("A área especificada não existe ou está inativa.");
+            }
+
+            funcionario.Nome = funcionarioDTO.Nome;
+            funcionario.DataNascimento = funcionarioDTO.DataNascimento;
+            funcionario.Cargo = funcionarioDTO.Cargo;
+            funcionario.Salario = funcionarioDTO.Salario;
+            funcionario.Documento = funcionarioDTO.Documento;
+            funcionario.Area = funcionarioDTO.Area;
+
+            await _context.SaveChangesAsync();
+            return Ok("Funcionario foi atualizado com sucesso.");
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteFuncionario(Guid id)
+        {
+            if (id == Guid.Empty)
+            {
+                return BadRequest("Funcionário não pode ficar em branco.");
+            }
+
+            var funcionario = await _context.Funcionarios.FirstOrDefaultAsync(f => f.Id == id && f.Ativo);
+            if (funcionario == null)
+            { 
+                return NotFound("Funcionário não encontrado");
+            }
+
+            var area = await _context.Areas.FirstOrDefaultAsync(a => a.Gestor == id);
+            if (area != null)
+            {
+                return BadRequest($"Não é possível desativar este funcionário, pois ele é gestor da área '{area.Nome}'");
+            }
+
+            funcionario.Desativar();
+            await _context.SaveChangesAsync();
+            return Ok("Funcionário foi desativado com sucesso."); 
+        }
     }
 }
