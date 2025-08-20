@@ -73,7 +73,7 @@ namespace RH.API.Controllers
             return CreatedAtAction(nameof(GetFuncionario), new { id = funcionario.Id }, funcionario);
         }
 
-        [HttpPatch("{funcionarioId}")]
+        [HttpPut("{funcionarioId}")]
         public async Task<IActionResult> EditFuncionario(Guid funcionarioId, [FromBody] FuncionarioDTO funcionarioDTO)
         {
             if (funcionarioId == Guid.Empty)
@@ -106,6 +106,31 @@ namespace RH.API.Controllers
 
             await _context.SaveChangesAsync();
             return Ok("Funcionario foi atualizado com sucesso.");
+        }
+
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> UpdateFuncionario(Guid id, [FromBody] Guid areaId)
+        {
+            if (areaId == Guid.Empty)
+            {
+                return BadRequest("Área não pode ser vazia.");
+            }
+
+            var area = await _context.Areas.FirstOrDefaultAsync(a => a.Id == areaId && a.Ativo);
+            if (area == null)
+            {
+                return NotFound("Área não encontrada.");
+            }
+
+            var funcionario = await _context.Funcionarios.FirstOrDefaultAsync(f => f.Id == id && f.Ativo);
+            if (funcionario == null)
+            {
+                return NotFound("Funcionário não encontrado.");
+            }
+
+            funcionario.Area = area.Id;
+            await _context.SaveChangesAsync();
+            return Ok("Funcionário Atualizado");
         }
 
         [HttpDelete("{id}")]
