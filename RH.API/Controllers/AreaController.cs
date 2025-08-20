@@ -51,7 +51,7 @@ namespace RH.API.Controllers
             return Ok("Área criada com sucesso!");
         }
 
-        [HttpPatch("/{areaId}")]
+        [HttpPatch("{areaId}")]
         public async Task<IActionResult> EditGestor(Guid areaId, [FromBody] Guid gestorId)
         {
             if (gestorId == Guid.Empty)
@@ -80,7 +80,7 @@ namespace RH.API.Controllers
             return Ok("Gestor atualizado.");
         }
 
-        [HttpDelete("/{id}")]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteArea(Guid id)
         {
             if (id == Guid.Empty)

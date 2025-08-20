@@ -73,7 +73,7 @@ namespace RH.API.Controllers
             return CreatedAtAction(nameof(GetFuncionario), new { id = funcionario.Id }, funcionario);
         }
 
-        [HttpPatch("/{funcionarioId}")]
+        [HttpPatch("{funcionarioId}")]
         public async Task<IActionResult> EditFuncionario(Guid funcionarioId, [FromBody] FuncionarioDTO funcionarioDTO)
         {
             if (funcionarioId == Guid.Empty)
@@ -120,12 +120,6 @@ namespace RH.API.Controllers
             if (funcionario == null)
             { 
                 return NotFound("Funcionário não encontrado");
-            }
-
-            var area = await _context.Areas.FirstOrDefaultAsync(a => a.Gestor == id);
-            if (area != null)
-            {
-                return BadRequest($"Não é possível desativar este funcionário, pois ele é gestor da área '{area.Nome}'");
             }
 
             funcionario.Desativar();
